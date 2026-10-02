@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ahorcado Curricular 🎓✨</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+      --card-bg: rgba(255, 255, 255, 0.92);
+      --primary: #FF6B6B;
+      --secondary: #4ECDC4;
+      --accent: #FFE66D;
+      --dark: #2F2E41;
+      --purple: #6C5CE7;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background: var(--bg-gradient);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+      color: var(--dark);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2.2rem;
+      color: var(--purple);
+      text-shadow: 2px 2px 0px #fff;
+    }
+
+    p.subtitle {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #444;
+    }
+
+    .audio-controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .btn-audio {
+      background: #fff;
+      border: 2px solid var(--purple);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-family: 'Fredoka One', cursive;
+      cursor: pointer;
+      color: var(--purple);
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .btn-audio:hover {
+      transform: scale(1.05);
+      background: var(--purple);
+      color: #fff;
+    }
+
+    .container {
+      background: var(--card-bg);
+      border-radius: 24px;
+      padding: 25px;
+      width: 100%;
+      max-width: 850px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      backdrop-filter: blur(8px);
+    }
+
+    /* Pantalla Selección */
+    .selection-screen {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .unit-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 15px;
+    }
+
+    .unit-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 15px;
+      border: 3px solid var(--secondary);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    .unit-card h3 {
+      font-family: 'Fredoka One', cursive;
+      color: var(--purple);
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+    }
+
+    .theme-btn {
+      width: 100%;
+      background: var(--bg-gradient);
+      border: none;
+      border-radius: 12px;
+      padding: 10px;
+      margin-top: 8px;
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 700;
+      color: var(--dark);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+    }
+
+    .theme-btn:hover {
+      background: var(--primary);
+      color: #fff;
+      transform: translateX(4px);
+    }
+
+    /* Pantalla Juego */
+    .game-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.1rem;
+      color: var(--purple);
+    }
+
+    .game-layout {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      width: 100%;
+      justify-content: center;
+      align-items: center;
+    }
+
+    canvas {
+      background: #FFF9E6;
+      border-radius: 20px;
+      border: 3px solid var(--accent);
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    .game-info {
+      flex: 1;
+      min-width: 280px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .hint-box {
+      background: #E0F7FA;
+      border-left: 5px solid var(--secondary);
+      border-radius: 12px;
+      padding: 12px;
+      width: 100%;
+      position: relative;
+    }
+
+    .hint-title {
+      font-weight: bold;
+      color: #00838F;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 5px;
+    }
+
+    .hint-text {
+      font-size: 0.95rem;
+      line-height: 1.3;
+    }
+
+    .btn-voice {
+      background: var(--purple);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 34px;
+      height: 34px;
+      cursor: pointer;
+      font-size: 1rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: auto;
+    }
+
+    .word-display {
+      display: flex;
+      gap: 8px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 2rem;
+      letter-spacing: 2px;
+      margin: 10px 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .letter-slot {
+      border-bottom: 4px solid var(--purple);
+      min-width: 30px;
+      text-align: center;
+      height: 45px;
+    }
+
+    .keyboard {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      max-width: 600px;
+    }
+
+    .key-btn {
+      background: #fff;
+      border: 2px solid var(--secondary);
+      border-radius: 10px;
+      width: 38px;
+      height: 42px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.1rem;
+      color: var(--dark);
+      cursor: pointer;
+      transition: all 0.15s;
+      box-shadow: 0 3px 0 var(--secondary);
+    }
+
+    .key-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      background: var(--accent);
+    }
+
+    .key-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: translateY(3px);
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-action {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 10px 20px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #D63031;
+      transition: all 0.15s;
+    }
+
+    .btn-action:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-back {
+      background: #6c757d;
+      box-shadow: 0 4px 0 #495057;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .modal-content {
+      background: #fff;
+      border-radius: 20px;
+      padding: 30px;
+      text-align: center;
+      max-width: 400px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    .modal-content h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 1.7rem; }
+      .container { padding: 15px; }
+      .key-btn { width: 32px; height: 36px; font-size: 0.9rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Ahorcado Curricular 🎓✨</h1>
+    <p class="subtitle">Aprende Planificación y Diseño Curricular Jugando</p>
+    <div class="audio-controls">
+      <button class="btn-audio" id="btn-music" onclick="toggleMusic()">🎵 Música: OFF</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Pantalla de Selección de Temas -->
+    <div class="selection-screen" id="selection-screen">
+      <h2 style="text-align:center; font-family:'Fredoka One'; color: var(--purple);">Selecciona una Unidad y Tema</h2>
+      <div class="unit-grid" id="unit-grid"></div>
+    </div>
+
+    <!-- Pantalla Principal del Juego -->
+    <div class="game-screen" id="game-screen">
+      <div class="game-header">
+        <span id="theme-title">Unidad X - Tema Y</span>
+        <span>Vidas: <span id="lives-count" style="color:var(--primary);">6</span> ❤️</span>
+      </div>
+
+      <div class="game-layout">
+        <canvas id="hangmanCanvas" width="200" height="230"></canvas>
+
+        <div class="game-info">
+          <div class="hint-box">
+            <div class="hint-title">
+              💡 Pista Académica
+              <button class="btn-voice" onclick="speakHint()" title="Escuchar pista con voz">🔊</button>
+            </div>
+            <div class="hint-text" id="hint-text">Cargando pista...</div>
+          </div>
+
+          <div class="word-display" id="word-display"></div>
+        </div>
+      </div>
+
+      <div class="keyboard" id="keyboard"></div>
+
+      <div class="actions">
+        <button class="btn-action btn-back" onclick="showSelection()">⬅️ Volver al Menú</button>
+        <button class="btn-action" onclick="nextWord()">Siguiente Palabra ➔</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Resultado -->
+  <div class="modal" id="result-modal">
+    <div class="modal-content">
+      <h2 id="modal-title">¡Ganaste! 🎉</h2>
+      <p id="modal-msg" style="margin-bottom: 20px; font-size: 1.1rem;"></p>
+      <button class="btn-action" onclick="closeModalNext()">Continuar 🚀</button>
+    </div>
+  </div>
+
+  <script>
+    // Base de datos estructurada por Unidades y Temas
+    const gameData = [
+      {
+        unit: "Unidad 1: Introducción a la Planificación",
+        themes: [
+          {
+            title: "Tema 1: Conceptos Básicos y Tipos",
+            words: [
+              { word: "PLANIFICACION", hint: "Proceso que define objetivos, metas y estrategias en la institución educativa." },
+              { word: "ESTRATEGICA", hint: "Evaluación sistemática a mediano y largo plazo orientada al contexto." },
+              { word: "OPERACIONAL", hint: "Planificación a corto plazo sobre el accionar diario con tareas medibles." },
+              { word: "HEURISTICA", hint: "Planificación con una pregunta central que une la teoría con la práctica pedagógica." }
+            ]
+          },
+          {
+            title: "Tema 2: Componentes del Currículo",
+            words: [
+              { word: "FILOSOFICO", hint: "Fundamento enfocado en qué debe y puede una persona lograr ser en la sociedad." },
+              { word: "SOCIOLOGICO", hint: "Fundamento que responde a las necesidades culturales de los grupos sociales." },
+              { word: "EPISTEMOLOGICO", hint: "Fundamento centrado en la investigación científica y la producción del saber." },
+              { word: "PSICOPEDAGOGICO", hint: "Fundamento basado en los procesos de evolución y desarrollo del ser humano." }
+            ]
+          }
+        ]
+      },
+      {
+        unit: "Unidad 2: Elementos y Clasificación",
+        themes: [
+          {
+            title: "Tema 1: Elementos de la Planificación",
+            words: [
+              { word: "OBJETIVOS", hint: "Expresan los logros que los estudiantes deben alcanzar en el ciclo escolar." },
+              { word: "CONTENIDOS", hint: "Conjunto de conocimientos, habilidades y destrezas agrupados por asignaturas." },
+              { word: "METODOLOGIA", hint: "Especifica las estrategias, técnicas y experiencias para orientar la enseñanza." },
+              { word: "EVALUACION", hint: "Proceso para verificar los progresos, dificultades y logros del aprendizaje." }
+            ]
+          },
+          {
+            title: "Tema 2: Tipos de Currículo y Transversalidad",
+            words: [
+              { word: "OFICIAL", hint: "Documento regulador con planes, programas y contenidos mínimos obligatorios." },
+              { word: "OCULTO", hint: "Valores, normas e ideologías implícitas ejercidas en la interacción escolar." },
+              { word: "NULO", hint: "Temas o contenidos no enseñados por considerarse secundarios o prescindibles." },
+              { word: "TRANSVERSALIDAD", hint: "Estrategia para integrar temas prioritarios de la vida en todo el currículo." }
+            ]
+          }
+        ]
+      },
+      {
+        unit: "Unidad 3: Plan Curricular Institucional (PCI)",
+        themes: [
+          {
+            title: "Tema 1: Construcción y Análisis del PCI",
+            words: [
+              { word: "DIAGNOSTICO", hint: "Análisis institucional que identifica problemas pedagógicos y del entorno." },
+              { word: "ENFOQUE", hint: "Describe el tipo de estudiante que la institución educativa aportará a la sociedad." },
+              { word: "LINEAMIENTOS", hint: "Directrices pedagógicas, metodológicas y de evaluación en la formulación del PCI." },
+              { word: "PROYECTOS", hint: "Estrategias pedagógicas interdisciplinarias que motivan la creatividad y emprendimiento." }
+            ]
+          },
+          {
+            title: "Tema 2: Componentes Operativos del PCI",
+            words: [
+              { word: "TUTORIA", hint: "Acción de acompañamiento académico y socioafectivo a los estudiantes." },
+              { word: "ACOMPAÑAMIENTO", hint: "Estrategia para fortalecer el desempeño profesional docente mediante el diálogo." },
+              { word: "MEJORA", hint: "Planes articulados al PEI para resolver brechas pedagógicas e institucionales." },
+              { word: "PENSUM", hint: "Estructura y distribución de la carga horaria de las áreas de estudio." }
+            ]
+          }
+        ]
+      },
+      {
+        unit: "Unidad 4: Planificación Anual y Adaptaciones",
+        themes: [
+          {
+            title: "Tema 1: Estructura de la PCA",
+            words: [
+              { word: "SUBNIVEL", hint: "Grado o tramo educativo sobre el cual se articulan las destrezas anuales." },
+              { word: "DESTREZAS", hint: "Capacidades con criterio de desempeño a desarrollar en el grupo escolar." },
+              { word: "CARGAHORARIA", hint: "Número de períodos semanales asignados a una materia o ámbito." },
+              { word: "PREPARATORIA", hint: "Primer grado de EGB caracterizado por contar con un currículo integral." }
+            ]
+          },
+          {
+            title: "Tema 2: Adaptaciones Curriculares",
+            words: [
+              { word: "ADAPTACION", hint: "Ajustes al currículo para atender las necesidades educativas individuales." },
+              { word: "DIVERSIDAD", hint: "Reconocimiento de las diferencias individuales, culturales y sociales en el aula." },
+              { word: "INCLUSION", hint: "Garantía del derecho a la educación para que ningún estudiante quede atrás." },
+              { word: "AUTONOMIA", hint: "Objetivo prioritario en las adaptaciones para fomentar la independencia funcional." }
+            ]
+          }
+        ]
+      }
+    ];
+
+    // Variables de estado del juego
+    let currentThemeWords = [];
+    let currentWordIndex = 0;
+    let selectedWordObj = null;
+    let guessedLetters = new Set();
+    let lives = 6;
+    let musicPlaying = false;
+    let audioCtx = null;
+    let musicInterval = null;
+
+    // Inicializar menú
+    function initMenu() {
+      const grid = document.getElementById('unit-grid');
+      grid.innerHTML = '';
+
+      gameData.forEach((u, uIdx) => {
+        const card = document.createElement('div');
+        card.className = 'unit-card';
+        card.innerHTML = `<h3>${u.unit}</h3>`;
+
+        u.themes.forEach((t, tIdx) => {
+          const btn = document.createElement('button');
+          btn.className = 'theme-btn';
+          btn.innerText = t.title;
+          btn.onclick = () => startGame(uIdx, tIdx);
+          card.appendChild(btn);
+        });
+
+        grid.appendChild(card);
+      });
+    }
+
+    function startGame(uIdx, tIdx) {
+      const themeObj = gameData[uIdx].themes[tIdx];
+      currentThemeWords = themeObj.words;
+      currentWordIndex = 0;
+      
+      document.getElementById('theme-title').innerText = `${gameData[uIdx].unit.split(':')[0]} - ${themeObj.title.split(':')[0]}`;
+      document.getElementById('selection-screen').style.display = 'none';
+      document.getElementById('game-screen').style.display = 'flex';
+
+      loadWord();
+    }
+
+    function showSelection() {
+      document.getElementById('selection-screen').style.display = 'flex';
+      document.getElementById('game-screen').style.display = 'none';
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    }
+
+    function loadWord() {
+      selectedWordObj = currentThemeWords[currentWordIndex];
+      guessedLetters.clear();
+      lives = 6;
+      document.getElementById('lives-count').innerText = lives;
+      document.getElementById('hint-text').innerText = selectedWordObj.hint;
+
+      renderWordDisplay();
+      renderKeyboard();
+      drawHangman();
+      speakHint();
+    }
+
+    function renderWordDisplay() {
+      const display = document.getElementById('word-display');
+      display.innerHTML = '';
+
+      for (let char of selectedWordObj.word) {
+        const slot = document.createElement('div');
+        slot.className = 'letter-slot';
+        if (guessedLetters.has(char)) {
+          slot.innerText = char;
+        } else {
+          slot.innerText = '';
+        }
+        display.appendChild(slot);
+      }
+    }
+
+    function renderKeyboard() {
+      const keyboard = document.getElementById('keyboard');
+      keyboard.innerHTML = '';
+      const letters = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ".split('');
+
+      letters.forEach(letra => {
+        const btn = document.createElement('button');
+        btn.className = 'key-btn';
+        btn.innerText = letra;
+        btn.disabled = guessedLetters.has(letra);
+        btn.onclick = () => handleGuess(letra);
+        keyboard.appendChild(btn);
+      });
+    }
+
+    function handleGuess(letter) {
+      guessedLetters.add(letter);
+      playPopSound();
+
+      if (selectedWordObj.word.includes(letter)) {
+        renderWordDisplay();
+        renderKeyboard();
+        checkWin();
+      } else {
+        lives--;
+        document.getElementById('lives-count').innerText = lives;
+        renderKeyboard();
+        drawHangman();
+        playWrongSound();
+        checkLoss();
+      }
+    }
+
+    function checkWin() {
+      const isWon = selectedWordObj.word.split('').every(char => guessedLetters.has(char));
+      if (isWon) {
+        playWinSound();
+        showModal("¡Excelente Trabajo! 🎉", `Adivinaste la palabra: <b>${selectedWordObj.word}</b>`);
+      }
+    }
+
+    function checkLoss() {
+      if (lives <= 0) {
+        showModal("¡Inténtalo de nuevo! 😢", `La palabra correcta era: <b>${selectedWordObj.word}</b>`);
+      }
+    }
+
+    function nextWord() {
+      currentWordIndex = (currentWordIndex + 1) % currentThemeWords.length;
+      loadWord();
+    }
+
+    function showModal(title, msg) {
+      document.getElementById('modal-title').innerText = title;
+      document.getElementById('modal-msg').innerHTML = msg;
+      document.getElementById('result-modal').style.display = 'flex';
+    }
+
+    function closeModalNext() {
+      document.getElementById('result-modal').style.display = 'none';
+      nextWord();
+    }
+
+    // Canvas Dibujo del Ahorcado
+    function drawHangman() {
+      const canvas = document.getElementById('hangmanCanvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = '#6C5CE7';
+      ctx.lineCap = 'round';
+
+      // Base
+      ctx.beginPath();
+      ctx.moveTo(20, 210); ctx.lineTo(180, 210); // Base
+      ctx.moveTo(50, 210); ctx.lineTo(50, 20);   // Poste
+      ctx.lineTo(130, 20);                        // Techo
+      ctx.lineTo(130, 45);                        // Cuerda
+      ctx.stroke();
+
+      const errors = 6 - lives;
+
+      if (errors >= 1) { // Cabeza
+        ctx.beginPath();
+        ctx.arc(130, 65, 20, 0, Math.PI * 2);
+        ctx.fillStyle = '#FFE66D';
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.fillStyle = '#2F2E41';
+        ctx.beginPath(); ctx.arc(123, 60, 3, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(137, 60, 3, 0, Math.PI*2); ctx.fill();
+      }
+
+      if (errors >= 2) { // Cuerpito
+        ctx.beginPath();
+        ctx.moveTo(130, 85); ctx.lineTo(130, 140);
+        ctx.strokeStyle = '#FF6B6B';
+        ctx.stroke();
+      }
+
+      if (errors >= 3) { // Brazo izquierdo
+        ctx.beginPath();
+        ctx.moveTo(130, 100); ctx.lineTo(105, 125);
+        ctx.stroke();
+      }
+
+      if (errors >= 4) { // Brazo derecho
+        ctx.beginPath();
+        ctx.moveTo(130, 100); ctx.lineTo(155, 125);
+        ctx.stroke();
+      }
+
+      if (errors >= 5) { // Pierna izquierda
+        ctx.beginPath();
+        ctx.moveTo(130, 140); ctx.lineTo(110, 180);
+        ctx.stroke();
+      }
+
+      if (errors >= 6) { // Pierna derecha
+        ctx.beginPath();
+        ctx.moveTo(130, 140); ctx.lineTo(150, 180);
+        ctx.stroke();
+      }
+    }
+
+    // Lectura por voz de la pista
+    function speakHint() {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(selectedWordObj.hint);
+        utterance.lang = 'es-ES';
+        utterance.rate = 0.95;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    // Efectos de sonido y audio con Web Audio API
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function toggleMusic() {
+      initAudio();
+      musicPlaying = !musicPlaying;
+      const btn = document.getElementById('btn-music');
+
+      if (musicPlaying) {
+        btn.innerText = "🎵 Música: ON";
+        startMelody();
+      } else {
+        btn.innerText = "🎵 Música: OFF";
+        stopMelody();
+      }
+    }
+
+    function startMelody() {
+      const notes = [261.63, 329.63, 392.00, 523.25, 440.00, 349.23];
+      let step = 0;
+
+      musicInterval = setInterval(() => {
+        if (!musicPlaying) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(notes[step % notes.length], audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.4);
+        step++;
+      }, 500);
+    }
+
+    function stopMelody() {
+      if (musicInterval) clearInterval(musicInterval);
+    }
+
+    function playPopSound() {
+      initAudio();
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.08);
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.08);
+    }
+
+    function playWrongSound() {
+      initAudio();
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.2);
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+    }
+
+    function playWinSound() {
+      initAudio();
+      if (!audioCtx) return;
+      const notes = [523.25, 659.25, 783.99, 1046.50];
+      notes.forEach((freq, idx) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.1);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime + idx * 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + idx * 0.1 + 0.2);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(audioCtx.currentTime + idx * 0.1);
+        osc.stop(audioCtx.currentTime + idx * 0.1 + 0.2);
+      });
+    }
+
+    // Inicialización
+    initMenu();
+  </script>
+</body>
+</html>
